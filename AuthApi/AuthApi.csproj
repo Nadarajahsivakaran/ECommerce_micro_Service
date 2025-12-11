@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AuthApi.Data\AuthApi.Data.csproj" />
     <ProjectReference Include="..\ECommerce.Data\ECommerce.Data.csproj" />
-    <ProjectReference Include="..\ProductApi.Infrastructure\ProductApi.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
