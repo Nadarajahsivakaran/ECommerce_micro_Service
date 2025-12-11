@@ -20,7 +20,7 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 #endregion
 
-#region Dependecy injection
+#region Dependecy injection -- Services
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 #endregion
@@ -36,14 +36,14 @@ app.UseGlobalExceptionHandler();
 #endregion
 
 
-// Configure the HTTP request pipeline.
+#region Configure the HTTP request pipeline and swagger
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
-// Make Swagger UI default page
 app.MapGet("/", () => Results.Redirect("/swagger"));
+#endregion
 
 app.UseHttpsRedirection();
 
