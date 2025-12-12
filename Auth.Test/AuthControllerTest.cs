@@ -90,5 +90,34 @@ namespace Auth.Test
 			Assert.Equal("Registration failed", response.Message);
 		}
 
+		// Test 3: Role does not exist, needs creation
+		[Fact]
+		public async Task Register_RoleDoesNotExist_CreatesRoleAndReturnsOk()
+		{
+			// Arrange
+			RegisterDto dto = new () { Email = "test@test.com", Password = "Password123" };
+			ApplicationUser user = new ();
+			RegisterResponseDto responseDto = new () { Email = "test@test.com" };
+
+			_mockMapper.Setup(m => m.Map<ApplicationUser>(dto)).Returns(user);
+			_mockUserManager.Setup(um => um.CreateAsync(user, dto.Password)).ReturnsAsync(IdentityResult.Success);
+
+			// Simulate role does not exist
+			_mockRoleManager.Setup(rm => rm.RoleExistsAsync("User")).ReturnsAsync(false);
+			_mockRoleManager.Setup(rm => rm.CreateAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Success);
+			_mockUserManager.Setup(um => um.AddToRoleAsync(user, "User")).ReturnsAsync(IdentityResult.Success);
+			_mockMapper.Setup(m => m.Map<RegisterResponseDto>(user)).Returns(responseDto);
+
+			// Act
+			IActionResult result = await _controller.Register(dto);
+
+			// Assert
+			var okResult = Assert.IsType<OkObjectResult>(result);
+			var response = Assert.IsType<ApiResponse<RegisterResponseDto>>(okResult.Value);
+			Assert.Equal(201, response.StatusCode);
+			Assert.Equal("User registered successfully", response.Message);
+			Assert.Equal("test@test.com", response.Data.Email);
+		}
+
 	}
 }
