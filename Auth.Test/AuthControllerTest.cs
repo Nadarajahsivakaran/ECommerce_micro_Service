@@ -119,5 +119,33 @@ namespace Auth.Test
 			Assert.Equal("test@test.com", response.Data.Email);
 		}
 
+		// Test 4: Role exists, just assign role
+		[Fact]
+		public async Task Register_RoleExists_AssignsRoleAndReturnsOk()
+		{
+			// Arrange
+			var dto = new RegisterDto { Email = "test2@test.com", Password = "Password123" };
+			var user = new ApplicationUser();
+			var responseDto = new RegisterResponseDto { Email = "test2@test.com" };
+
+			_mockMapper.Setup(m => m.Map<ApplicationUser>(dto)).Returns(user);
+			_mockUserManager.Setup(um => um.CreateAsync(user, dto.Password)).ReturnsAsync(IdentityResult.Success);
+
+			// Simulate role already exists
+			_mockRoleManager.Setup(rm => rm.RoleExistsAsync("User")).ReturnsAsync(true);
+			_mockUserManager.Setup(um => um.AddToRoleAsync(user, "User")).ReturnsAsync(IdentityResult.Success);
+			_mockMapper.Setup(m => m.Map<RegisterResponseDto>(user)).Returns(responseDto);
+
+			// Act
+			var result = await _controller.Register(dto);
+
+			// Assert
+			var okResult = Assert.IsType<OkObjectResult>(result);
+			var response = Assert.IsType<ApiResponse<RegisterResponseDto>>(okResult.Value);
+			Assert.Equal(201, response.StatusCode);
+			Assert.Equal("User registered successfully", response.Message);
+			Assert.Equal("test2@test.com", response.Data.Email);
+		}
+
 	}
 }
