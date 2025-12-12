@@ -10,7 +10,7 @@ namespace ProductApi.Models
 		public string Name { get; set; } = string.Empty;
 
 		[MaxLength(250)]
-		public string? Description { get; set; }
+		public string Description { get; set; } = string.Empty;
 
 		// Navigation property
 		public ICollection<Product> Products { get; set; } = [];
