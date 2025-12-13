@@ -13,29 +13,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # 1) Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      # 2) Setup .NET 10 Preview
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 10.0.100-preview.7
 
-      - name: Install .NET test workload
+      # 3) Install .NET test workload (useful for preview)
+      - name: Install test workload
         run: dotnet workload install test
 
+      # 4) Restore NuGet packages
       - name: Restore dependencies
         run: dotnet restore
 
+      # 5) Build entire solution
       - name: Build solution
         run: dotnet build --no-restore --configuration Release --verbosity minimal
 
-      - name: List test projects
-        run: find . -name "*Tests.csproj"
+      # 6) Run tests per test project
+      # Replace the below paths with YOUR actual test project paths
+      - name: Run AuthApi tests
+        run: dotnet test Tests/Auth.Tests/Auth.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"
 
-      - name: Run tests
-        run: |
-          set -e
-          for proj in $(find . -name "*Tests.csproj"); do
-            echo "Running tests in $proj"
-            dotnet test $proj --no-build --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
-          done
+      # - name: Run OrdersApi tests
+      #   run: dotnet test Tests/OrdersApi.Tests/OrdersApi.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"
+
+      # - name: Run PaymentsApi tests
+      #   run: dotnet test Tests/PaymentsApi.Tests/PaymentsApi.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"

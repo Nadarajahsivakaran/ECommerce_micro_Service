@@ -1,5 +1,7 @@
 <Solution>
-  <Project Path="Auth.Test/Auth.Test.csproj" Id="7d4ec2ff-53ff-4560-93a9-669a7f0f036a" />
+  <Folder Name="/Test/">
+    <Project Path="Auth.Test/Auth.Test.csproj" Id="7d4ec2ff-53ff-4560-93a9-669a7f0f036a" />
+  </Folder>
   <Project Path="AuthApi.Data/AuthApi.Data.csproj" Id="36a8af82-a8f5-43b7-bb70-18a86ecab956" />
   <Project Path="AuthApi.Models/AuthApi.Models.csproj" Id="b9ad3582-8346-4d6d-8591-a91e905e4be1" />
   <Project Path="AuthApi/AuthApi.csproj" Id="20578702-e25f-40dd-9b2b-d766e7f56633" />
