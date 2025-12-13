@@ -152,8 +152,8 @@ namespace Auth.Test
 		public async Task Register_AssignRoleFails_ReturnsBadRequest()
 		{
 			// Arrange
-			var dto = new RegisterDto { Email = "fail@test.com", Password = "Password123" };
-			var user = new ApplicationUser();
+			RegisterDto dto = new () { Email = "fail@test.com", Password = "Password123" };
+			ApplicationUser user = new ();
 
 			_mockMapper.Setup(m => m.Map<ApplicationUser>(dto)).Returns(user);
 			_mockUserManager.Setup(um => um.CreateAsync(user, dto.Password)).ReturnsAsync(IdentityResult.Success);
@@ -164,11 +164,11 @@ namespace Auth.Test
 				.ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Role assignment failed" }));
 
 			// Act
-			var result = await _controller.Register(dto);
+			IActionResult result = await _controller.Register(dto);
 
 			// Assert
-			var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-			var response = Assert.IsType<ApiResponse<RegisterDto>>(badRequest.Value);
+			BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
+			ApiResponse<RegisterDto> response = Assert.IsType<ApiResponse<RegisterDto>>(badRequest.Value);
 			Assert.Contains("Role assignment failed", response.Error);
 		}
 
