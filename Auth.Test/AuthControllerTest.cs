@@ -112,8 +112,8 @@ namespace Auth.Test
 			IActionResult result = await _controller.Register(dto);
 
 			// Assert
-			var okResult = Assert.IsType<OkObjectResult>(result);
-			var response = Assert.IsType<ApiResponse<RegisterResponseDto>>(okResult.Value);
+			OkObjectResult okResult = Assert.IsType<OkObjectResult>(result);
+			ApiResponse<RegisterResponseDto> response = Assert.IsType<ApiResponse<RegisterResponseDto>>(okResult.Value);
 			Assert.Equal(201, response.StatusCode);
 			Assert.Equal("User registered successfully", response.Message);
 			Assert.Equal("test@test.com", response.Data.Email);
