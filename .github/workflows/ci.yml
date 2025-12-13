@@ -1,5 +1,6 @@
 name: .NET CI
 
+# Trigger workflow on push or pull request to dev branch
 on:
   push:
     branches:
@@ -13,35 +14,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout repo
-      - name: Checkout code
+      # 1) Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Setup .NET 10 Preview
+      # 2) Setup .NET 10 preview SDK
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 10.0.100-preview.7
 
-      # 3) Install .NET test workload (useful for preview)
-      - name: Install test workload
+      # 3) Install test workload (needed for preview SDK)
+      - name: Install .NET test workload
         run: dotnet workload install test
 
-      # 4) Restore NuGet packages
+      # 4) Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # 5) Build entire solution
+      # 5) Build solution
       - name: Build solution
-        run: dotnet build --no-restore --configuration Release --verbosity minimal
+        run: dotnet build ECommerce.sln --no-restore --configuration Release --verbosity minimal
 
-      # 6) Run tests per test project
-      # Replace the below paths with YOUR actual test project paths
+      # 6) Run tests for Auth microservice
       - name: Run AuthApi tests
-        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --collect:"XPlat Code Coverage"
+        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
 
-      # - name: Run OrdersApi tests
-      #   run: dotnet test Tests/OrdersApi.Tests/OrdersApi.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"
-
-      # - name: Run PaymentsApi tests
-      #   run: dotnet test Tests/PaymentsApi.Tests/PaymentsApi.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"
+      # 7) Optional: Run all tests via solution (if you add more test projects)
+      # - name: Run all tests via solution
+      #   run: dotnet test ECommerce.sln --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
