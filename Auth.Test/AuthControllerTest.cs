@@ -147,5 +147,30 @@ namespace Auth.Test
 			Assert.Equal("test2@test.com", response.Data.Email);
 		}
 
+		// Test 5: Assign role fails
+		[Fact]
+		public async Task Register_AssignRoleFails_ReturnsBadRequest()
+		{
+			// Arrange
+			var dto = new RegisterDto { Email = "fail@test.com", Password = "Password123" };
+			var user = new ApplicationUser();
+
+			_mockMapper.Setup(m => m.Map<ApplicationUser>(dto)).Returns(user);
+			_mockUserManager.Setup(um => um.CreateAsync(user, dto.Password)).ReturnsAsync(IdentityResult.Success);
+			_mockRoleManager.Setup(rm => rm.RoleExistsAsync("User")).ReturnsAsync(true);
+
+			// Simulate failure adding role
+			_mockUserManager.Setup(um => um.AddToRoleAsync(user, "User"))
+				.ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Role assignment failed" }));
+
+			// Act
+			var result = await _controller.Register(dto);
+
+			// Assert
+			var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+			var response = Assert.IsType<ApiResponse<RegisterDto>>(badRequest.Value);
+			Assert.Contains("Role assignment failed", response.Error);
+		}
+
 	}
 }
