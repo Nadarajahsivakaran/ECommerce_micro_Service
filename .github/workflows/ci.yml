@@ -38,7 +38,7 @@ jobs:
       # 6) Run tests per test project
       # Replace the below paths with YOUR actual test project paths
       - name: Run AuthApi tests
-        run: dotnet test Auth.Tests/Auth.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"
+        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --collect:"XPlat Code Coverage"
 
       # - name: Run OrdersApi tests
       #   run: dotnet test Tests/OrdersApi.Tests/OrdersApi.Tests.csproj --configuration Release --collect:"XPlat Code Coverage"
