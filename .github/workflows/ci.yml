@@ -1,6 +1,5 @@
 name: .NET CI
 
-# Trigger workflow on push or pull request to dev branch
 on:
   push:
     branches:
@@ -14,32 +13,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      # Setup .NET SDK
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.100-preview.7
 
-      # Restore dependencies
+      - name: Install .NET test workload
+        run: dotnet workload install test
+
       - name: Restore dependencies
         run: dotnet restore
 
-      # Build the solution
       - name: Build solution
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release --verbosity minimal
 
-      # Run all tests and collect code coverage
+      - name: List test projects
+        run: find . -name "*Tests.csproj"
+
       - name: Run tests
-        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
-
-      # Optional: Show git info for debugging
-      - name: Git info
         run: |
-          echo "Current branch:"
-          git branch
-          echo "Last commit:"
-          git log -1 --oneline
+          set -e
+          for proj in $(find . -name "*Tests.csproj"); do
+            echo "Running tests in $proj"
+            dotnet test $proj --no-build --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
+          done
