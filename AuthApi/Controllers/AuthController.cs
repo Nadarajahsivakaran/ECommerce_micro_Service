@@ -41,7 +41,13 @@ namespace AuthApi.Controllers
 			// Assign default role
 			if (!await _roleManager.RoleExistsAsync("User"))
 				await _roleManager.CreateAsync(new IdentityRole { Name = "User" });
-			await _userManager.AddToRoleAsync(user, "User");
+			
+			IdentityResult roleResult = await _userManager.AddToRoleAsync(user, "User");
+			if (!roleResult.Succeeded)
+			{
+				string errors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+				return BadRequest(ApiResponse<RegisterDto>.FailResponse(errors, "Role assignment failed"));
+			}
 
 			RegisterResponseDto response = _mapper.Map<RegisterResponseDto>(user);
 			return Ok(ApiResponse<RegisterResponseDto>.SuccessResponse(response, "User registered successfully",201));
