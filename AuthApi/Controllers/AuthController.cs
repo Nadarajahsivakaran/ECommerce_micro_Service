@@ -96,6 +96,7 @@ namespace AuthApi.Controllers
 		{
 			RefreshToken savedToken = await _authService.FindSingleAsync(t=>t.Token == refreshToken);
 
+
 			if (savedToken == null || savedToken.IsRevoked || savedToken.Expires < DateTime.UtcNow)
 				return Unauthorized(ApiResponse<string>.FailResponse("Invalid or expired refresh token"));
 
