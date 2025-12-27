@@ -2,14 +2,15 @@
 using ProductApi.Models;
 using ProductApi.Models.DTO;
 
-namespace ProductApi.Infrastructure
+namespace ECommerce.Data.Profiles
 {
-    public class MappingProfile : Profile
-    {
-        public MappingProfile() {
+    public class ProductProfile : Profile
+	{
+		public ProductProfile()
+		{
 			CreateMap<CategoryCreateDto, Category>().ReverseMap();
 			CreateMap<CategoryDto, Category>().ReverseMap();
+			CreateMap<Product,ProductDto>();
 		}
-        
-    }
+	}
 }

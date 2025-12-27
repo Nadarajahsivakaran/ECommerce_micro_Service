@@ -1,0 +1,86 @@
+﻿@page "/products"
+@using Blazor_Web.Models
+@inject IHttpClientFactory HttpClientFactory
+
+<h3 class="text-center bg-primary text-white p-3 rounded">
+    Product List
+</h3>
+
+
+@if (products == null)
+{
+    <div class="text-secondary">Loading...</div>
+}
+else if (!products.Any())
+{
+    <div class="text-secondary">No products available.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover table-dark">
+            <thead>
+                <tr>
+                    <th>#</th> <!-- Row number column -->
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th class="text-end">Price</th>
+                    <th class="text-end">Stock</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (products != null)
+                {
+                    int index = 1; // initialize counter
+                    foreach (var product in products)
+                    {
+                        <tr>
+                            <td>@index</td>  <!-- display row number -->
+                            <td>@product.Name</td>
+                            <td>@product.Description</td>
+                            <td class="text-end">@product.Price.ToString("C")</td>
+                            <td class="text-end">@product.Stock</td>
+                            <td>@product.CategoryName</td>
+                            <td>
+                                <span class="badge @(product.IsActive ? "bg-success" : "bg-danger")">
+                                    @(product.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary me-1">Edit</button>
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </td>
+                        </tr>
+                        index++; // increment counter
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+
+}
+
+@code {
+    private List<ProductDto>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ProductApi");
+        try
+        {
+            var response = await client.GetFromJsonAsync<ApiResponse<List<ProductDto>>>(
+               "api/Product/GetAll");
+
+            products = response?.Data;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading products: {ex.Message}");
+        }
+
+    }
+}
