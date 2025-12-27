@@ -4,9 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthApi.Data
 {
-    public class AuthDbContext(DbContextOptions<AuthDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+	public class AuthDbContext : IdentityDbContext<ApplicationUser>
 	{
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+		public AuthDbContext(DbContextOptions<AuthDbContext> options): base(options)
+		{
+		}
+
+		public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+		public DbSet<RefreshToken> RefreshTokens { get; set; }
 	}
 }
 
