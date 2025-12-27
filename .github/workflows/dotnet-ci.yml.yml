@@ -1,0 +1,45 @@
+name: .NET CI
+
+# Trigger workflow on push or pull request to dev branch
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2) Setup .NET 10 preview SDK
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 10.0.100-preview.7
+
+      # 3) Install test workload (needed for preview SDK)
+      - name: Install .NET test workload
+        run: dotnet workload install test
+
+      # 4) Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # 5) Build solution
+      - name: Build solution
+        run: dotnet build E_Commerce.sln --no-restore --configuration Release --verbosity minimal
+
+      # 6) Run tests for Auth microservice
+      - name: Run AuthApi tests
+        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
+
+      # 7) Optional: Run all tests via solution (if you add more test projects)
+      # - name: Run all tests via solution
+      #   run: dotnet test ECommerce.sln --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
