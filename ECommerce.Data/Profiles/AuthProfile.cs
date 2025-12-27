@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using AuthApi.Models;
 using AuthApi.Models.DTO;
+using ProductApi.Models.DTO;
+using ProductApi.Models;
 
 namespace ECommerce.Data.Profiles
 {

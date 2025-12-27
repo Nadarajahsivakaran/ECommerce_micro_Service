@@ -21,5 +21,8 @@ namespace AuthApi.Models.DTO
 		[Required(ErrorMessage = "Confirm password is required")]
 		[Compare("Password", ErrorMessage = "Passwords do not match")]
 		public string ConfirmPassword { get; set; } = string.Empty;
+
+		[Required(ErrorMessage = "Role is required")]
+		public UserRole Role { get; set; } = UserRole.User; // default value
 	}
 }
