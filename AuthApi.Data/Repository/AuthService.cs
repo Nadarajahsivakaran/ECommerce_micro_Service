@@ -13,11 +13,9 @@ namespace AuthApi.Data.Repository
 	public class AuthService : GenericRepository<RefreshToken>, IAuthService
 	{
 		private readonly IConfiguration _config;
-		private readonly AuthDbContext _context;
 
 		public AuthService(AuthDbContext context, IConfiguration config) : base(context)
 		{
-			_context = context;
 			_config = config;
 		}
 
@@ -61,7 +59,7 @@ namespace AuthApi.Data.Repository
 		{
 			RefreshToken? token = await GetByIdAsync(id);
 
-            if(token == null)
+            if (token == null)
 				throw new KeyNotFoundException("Refresh token not found");
 
 			token.IsRevoked = true;

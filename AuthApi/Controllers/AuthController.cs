@@ -14,11 +14,11 @@ namespace AuthApi.Controllers
 	{
 		private readonly UserManager<ApplicationUser> _userManager = userManager;
 		private readonly RoleManager<IdentityRole> _roleManager = roleManager;
-        private readonly IAuthService _authService = authService;
+		private readonly IAuthService _authService = authService;
 		private readonly IMapper _mapper = mapper;
 
-
-        [HttpPost(nameof(Register))]
+		#region Register
+		[HttpPost(nameof(Register))]
 		public async Task<IActionResult> Register(RegisterDto dto)
 		{
 			if (!ModelState.IsValid)
@@ -52,9 +52,11 @@ namespace AuthApi.Controllers
 			}
 
 			RegisterResponseDto response = _mapper.Map<RegisterResponseDto>(user);
-			return Ok(ApiResponse<RegisterResponseDto>.SuccessResponse(response, "User registered successfully",201));
+			return Ok(ApiResponse<RegisterResponseDto>.SuccessResponse(response, "User registered successfully", 201));
 		}
+		#endregion
 
+		#region Login
 		[HttpPost(nameof(Login))]
 		public async Task<IActionResult> Login(LoginDto dto)
 		{
@@ -74,13 +76,13 @@ namespace AuthApi.Controllers
 				return Unauthorized(ApiResponse<LoginDto>.FailResponse("Invalid credentials", "Login failed", 401));
 
 			IList<string> roles = await _userManager.GetRolesAsync(user);
-			
+
 			// Generate Access Token
 			string token = _authService.CreateToken(user, roles);
 
 			// Generate Refresh Token
 			string refreshToken = _authService.GenerateRefreshToken();
-			
+
 			await _authService.AddAsync(new RefreshToken
 			{
 				Token = refreshToken,
@@ -90,16 +92,19 @@ namespace AuthApi.Controllers
 
 
 			return Ok(ApiResponse<object>.SuccessResponse(
-				new{
-						AccessToken = token,
-						RefreshToken = refreshToken
-					}, "Login successful"));
+				new
+				{
+					AccessToken = token,
+					RefreshToken = refreshToken,
+					Roles = roles
+				}, "Login successful"));
 		}
+		#endregion
 
 		[HttpPost(nameof(Refresh))]
 		public async Task<IActionResult> Refresh(string refreshToken)
 		{
-			RefreshToken savedToken = await _authService.FindSingleAsync(t=>t.Token == refreshToken);
+			RefreshToken savedToken = await _authService.FindSingleAsync(t => t.Token == refreshToken);
 
 
 			if (savedToken == null || savedToken.IsRevoked || savedToken.Expires < DateTime.UtcNow)
