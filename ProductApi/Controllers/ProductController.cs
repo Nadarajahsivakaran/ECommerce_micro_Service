@@ -11,7 +11,7 @@ namespace ProductApi.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize(Roles = "Admin,SuperAdmin")]
+	//[Authorize(Roles = "Admin,SuperAdmin")]
 	public class ProductController(IProductRepository productRepository, IMapper mapper) : ControllerBase
 	{
 		private readonly IProductRepository _productRepository = productRepository;
