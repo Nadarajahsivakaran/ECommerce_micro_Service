@@ -4,9 +4,19 @@ using ECommerce.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using System.Diagnostics;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+	.Enrich.FromLogContext()
+	.WriteTo.Console() // Logs to console
+	.WriteTo.File("logs/gateway-.log", rollingInterval: RollingInterval.Day) // Logs to file
+	.CreateLogger();
+builder.Host.UseSerilog();
 
 #region JWT Authentication
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -72,6 +82,54 @@ builder.Services.AddReverseProxy()
 
 var app = builder.Build();
 
+#region Request Logging Middleware
+app.Use(async (context, next) =>
+{
+	// Skip health checks
+	if (context.Request.Path.StartsWithSegments("/health"))
+	{
+		await next();
+		return;
+	}
+
+	var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+
+	// Only evaluate expensive arguments if logging is enabled
+	if (logger.IsEnabled(LogLevel.Information))
+	{
+		Stopwatch stopwatch = Stopwatch.StartNew();
+
+		var userId = context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+		var role = context.User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+		logger.LogInformation(
+			"Incoming request {Method} {Path} | UserId={UserId} Role={Role} IP={IP}",
+			context.Request.Method,
+			context.Request.Path,
+			userId ?? "Anonymous",
+			role ?? "None",
+			context.Connection.RemoteIpAddress
+		);
+
+		await next();
+
+		stopwatch.Stop();
+
+		logger.LogInformation(
+			"Response {StatusCode} for {Path} in {ElapsedMs} ms | UserId={UserId}",
+			context.Response.StatusCode,
+			context.Request.Path,
+			stopwatch.ElapsedMilliseconds,
+			userId ?? "Anonymous"
+		);
+	}
+	else
+		await next();
+	
+});
+#endregion
+
+
 #region Middleware Order
 app.UseRouting();
 app.UseAuthentication();
@@ -112,6 +170,5 @@ app.MapReverseProxy(proxyPipeline =>
 	});
 });
 #endregion
-
 
 app.Run();
