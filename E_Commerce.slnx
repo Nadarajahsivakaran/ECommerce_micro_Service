@@ -3,7 +3,7 @@
     <Project Path="ApiGateway/ApiGateway.csproj" Id="74995291-c2dc-40ff-b962-74d42e2ddcda" />
   </Folder>
   <Folder Name="/Client/">
-    <Project Path="Blazor_Web/Blazor_Web.csproj" Id="f8731fca-0679-4931-a23e-bf6562720ee1" />
+     <Project Path="E_Commerce_Web/E_Commerce_Web.csproj" Id="0e5d1f7d-214f-403f-b6ad-c756324db8f2" />
   </Folder>
   <Folder Name="/Server/">
     <Project Path="AuthApi.Data/AuthApi.Data.csproj" Id="36a8af82-a8f5-43b7-bb70-18a86ecab956" />
