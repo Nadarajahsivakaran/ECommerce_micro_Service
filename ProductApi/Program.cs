@@ -95,6 +95,7 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 #endregion
 
 #region Dependency Injection
+
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
