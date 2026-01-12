@@ -1,0 +1,8 @@
+﻿footer a {
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+	footer a:hover {
+		color: #ffc107;
+	}

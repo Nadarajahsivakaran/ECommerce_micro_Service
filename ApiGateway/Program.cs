@@ -1,174 +1,62 @@
-﻿using ApiGateway;
-using AuthApi.Models.DTO;
-using ECommerce.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using Serilog;
-using System.Diagnostics;
+﻿
+using Microsoft.OpenApi;
 using System.Text;
+using Yarp.ReverseProxy;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
-Log.Logger = new LoggerConfiguration()
-	.Enrich.FromLogContext()
-	.WriteTo.Console() // Logs to console
-	.WriteTo.File("logs/gateway-.log", rollingInterval: RollingInterval.Day) // Logs to file
-	.CreateLogger();
-builder.Host.UseSerilog();
-
-#region JWT Authentication
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-	.AddJwtBearer(options =>
+// --------------------------- Swagger Setup (.NET 10 style) ---------------------------
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+	options.SwaggerDoc("gateway", new OpenApiInfo
 	{
-		options.TokenValidationParameters = new TokenValidationParameters
-		{
-			ValidateIssuer = true,
-			ValidateAudience = true,
-			ValidateLifetime = true,
-			ValidateIssuerSigningKey = true,
-			ValidIssuer = builder.Configuration["Jwt:Issuer"],
-			ValidAudience = builder.Configuration["Jwt:Audience"],
-			IssuerSigningKey = new SymmetricSecurityKey(key)
-		};
-
-		options.Events = new JwtBearerEvents
-		{
-			OnChallenge = context =>
-			{
-				context.HandleResponse(); 
-				context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-				context.Response.ContentType = "application/json";
-
-				var response = ApiResponse<string>.FailResponse(
-					"Unauthorized",
-					"Authentication failed",
-					StatusCodes.Status401Unauthorized
-				);
-
-				return context.Response.WriteAsJsonAsync(response);
-			},
-			OnForbidden = context =>
-			{
-				context.Response.StatusCode = StatusCodes.Status403Forbidden;
-				context.Response.ContentType = "application/json";
-
-				var response = ApiResponse<string>.FailResponse(
-					"Forbidden",
-					"You do not have permission to access this resource",
-					StatusCodes.Status403Forbidden
-				);
-				return context.Response.WriteAsJsonAsync(response);
-			}
-		};
+		Title = "API Gateway",
+		Version = "v1"
 	});
-#endregion
 
-#region Authorization Policies
-static string RoleName(UserRole role) => role.ToString();
+	//// NEW .NET 10 SECURITY DEFINITION
+	//options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+	//{
+	//	Type = SecuritySchemeType.Http,
+	//	Scheme = "bearer",
+	//	BearerFormat = "JWT",
+	//	Description = "JWT Authorization header using the Bearer scheme."
+	//});
 
-builder.Services.AddAuthorizationBuilder()
-	.AddPolicy("UserOnly", policy => policy.RequireRole(RoleName(UserRole.User)))
-	.AddPolicy("AdminOnly", policy => policy.RequireRole(RoleName(UserRole.Admin)))
-	.AddPolicy("AdminOrSuperAdmin", policy => policy.RequireRole(RoleName(UserRole.Admin), RoleName(UserRole.SuperAdmin)))
-	.AddPolicy("AnyRole", policy => policy.RequireRole(RoleName(UserRole.User), RoleName(UserRole.Admin), RoleName(UserRole.SuperAdmin)));
-#endregion
+	//// NEW .NET 10 SECURITY REQUIREMENT
+	//options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+	//{
+	//	[new OpenApiSecuritySchemeReference("bearer", document)] = []
+	//});
+});
 
-// Add Reverse Proxy
-builder.Services.AddReverseProxy()
+// --------------------------- Reverse Proxy Setup ---------------------------
+builder.Services
+	.AddReverseProxy()
 	.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 var app = builder.Build();
 
-#region Request Logging Middleware
-app.Use(async (context, next) =>
+// --------------------------- Middleware ---------------------------
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
 {
-	// Skip health checks
-	if (context.Request.Path.StartsWithSegments("/health"))
-	{
-		await next();
-		return;
-	}
+	options.RoutePrefix = "gateway";
 
-	var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+	// Gateway Swagger
+	options.SwaggerEndpoint("/swagger/gateway/swagger.json", "API Gateway");
 
-	// Only evaluate expensive arguments if logging is enabled
-	if (logger.IsEnabled(LogLevel.Information))
-	{
-		Stopwatch stopwatch = Stopwatch.StartNew();
-
-		var userId = context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-		var role = context.User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-
-		logger.LogInformation(
-			"Incoming request {Method} {Path} | UserId={UserId} Role={Role} IP={IP}",
-			context.Request.Method,
-			context.Request.Path,
-			userId ?? "Anonymous",
-			role ?? "None",
-			context.Connection.RemoteIpAddress
-		);
-
-		await next();
-
-		stopwatch.Stop();
-
-		logger.LogInformation(
-			"Response {StatusCode} for {Path} in {ElapsedMs} ms | UserId={UserId}",
-			context.Response.StatusCode,
-			context.Request.Path,
-			stopwatch.ElapsedMilliseconds,
-			userId ?? "Anonymous"
-		);
-	}
-	else
-		await next();
-	
+	// Downstream Swagger
+	options.SwaggerEndpoint("/swagger/product/v1/swagger.json", "Product API");
+	options.SwaggerEndpoint("/swagger/auth/v1/swagger.json", "Auth API");
 });
-#endregion
 
+// Redirect root → /gateway
+app.MapGet("/", () => Results.Redirect("/gateway"));
 
-#region Middleware Order
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-#endregion
-
-#region Reverse Proxy with Dictionary-based Role Enforcement
-app.MapReverseProxy(proxyPipeline =>
-{
-	proxyPipeline.Use(async (context, next) =>
-	{
-		var path = context.Request.Path.Value?.ToLower() ?? "";
-
-		if (RouteRolePolicy.Policies.TryGetValue(path, out var policyName))
-		{
-			var authService = context.Request.HttpContext.RequestServices
-				.GetRequiredService<IAuthorizationService>();
-
-			var authResult = await authService.AuthorizeAsync(context.User, null, policyName);
-
-			if (!authResult.Succeeded)
-			{
-				context.Response.StatusCode = StatusCodes.Status403Forbidden;
-				context.Response.ContentType = "application/json";
-
-				ApiResponse<string> response = ApiResponse<string>.FailResponse(
-					"Forbidden",
-					"You do not have permission to access this resource",
-					StatusCodes.Status403Forbidden
-				);
-
-				await context.Response.WriteAsJsonAsync(response);
-				return;
-			}
-		}
-
-		await next();
-	});
-});
-#endregion
+// Reverse proxy
+app.MapReverseProxy();
 
 app.Run();
