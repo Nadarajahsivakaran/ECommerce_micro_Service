@@ -9,7 +9,8 @@ namespace ProductApi.Models.DTO
 		public string Description { get; set; } = string.Empty;  // Product description
 		public double Price { get; set; }      // Product price
 		public int Stock { get; set; }         // Available stock
-		public bool IsActive { get; set; }     // Product status
+		public bool IsActive { get; set; } = true;  // Product status
 		public string CategoryName { get; set; } = string.Empty; // Related category name
+		public string? ImageUrl { get; set; }
 	}
 }

@@ -32,15 +32,34 @@ namespace ECommerce.Data.Middleware
 				KeyNotFoundException => HttpStatusCode.NotFound,
 				UnauthorizedAccessException => HttpStatusCode.Unauthorized,
 				ArgumentException => HttpStatusCode.BadRequest,
+				InvalidOperationException => HttpStatusCode.BadRequest,
 				_ => HttpStatusCode.InternalServerError
 			};
 
-			ApiResponse<string> response = ApiResponse<string>.FailResponse(ex.Message, "An unexpected error occurred.", (int)statusCode);
+			var response = ApiResponse<string>.FailResponse(
+				error: ex.Message,
+				message: GetFriendlyMessage(statusCode),
+				data: null,
+				statusCode: (int)statusCode
+			);
+
 			context.Response.ContentType = "application/json";
 			context.Response.StatusCode = (int)statusCode;
 
 			string json = JsonSerializer.Serialize(response);
 			return context.Response.WriteAsync(json);
 		}
+
+		private static string GetFriendlyMessage(HttpStatusCode statusCode)
+		{
+			return statusCode switch
+			{
+				HttpStatusCode.NotFound => "The requested resource was not found.",
+				HttpStatusCode.Unauthorized => "You are not authorized to perform this action.",
+				HttpStatusCode.BadRequest => "The request was invalid.",
+				_ => "An unexpected error occurred."
+			};
+		}
+
 	}
 }

@@ -20,13 +20,14 @@ namespace ECommerce.Models
 			};
 		}
 
-		public static ApiResponse<T> FailResponse(string error, string? message = null, int statusCode = 400)
+		public static ApiResponse<T> FailResponse(string error, string? message = null, T? data = default, int statusCode = 400)
 		{
 			return new ApiResponse<T>
 			{
 				Success = false,
 				Message = message,
 				Error = error,
+				Data = data,
 				StatusCode = statusCode
 			};
 		}

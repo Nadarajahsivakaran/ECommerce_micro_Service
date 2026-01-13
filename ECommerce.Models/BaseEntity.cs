@@ -5,7 +5,7 @@ namespace ECommerce.Models
 	public abstract class BaseEntity
 	{
 		[Key]
-		public Guid Id { get; set; }       // or int, but Guid is nice for microservices
+		public Guid Id { get; set; }      
 
 		[Required]
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

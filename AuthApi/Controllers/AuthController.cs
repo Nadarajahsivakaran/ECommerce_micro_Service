@@ -2,6 +2,7 @@
 using AuthApi.Models;
 using AuthApi.Models.DTO;
 using AutoMapper;
+using Azure.Core;
 using ECommerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -70,10 +71,17 @@ namespace AuthApi.Controllers
 			}
 
 			ApplicationUser? user = await _userManager.FindByEmailAsync(dto.Email);
-			if (user == null) return Unauthorized(ApiResponse<LoginDto>.FailResponse("Invalid credentials", "Login failed", 401));
+			if (user == null)
+				return Unauthorized(ApiResponse<LoginDto>.FailResponse(
+					error: "Invalid credentials",
+					message: "Login failed",
+					statusCode: StatusCodes.Status401Unauthorized));
 
 			if (!await _userManager.CheckPasswordAsync(user, dto.Password))
-				return Unauthorized(ApiResponse<LoginDto>.FailResponse("Invalid credentials", "Login failed", 401));
+				return Unauthorized(ApiResponse<LoginDto>.FailResponse(
+					error: "Invalid credentials",
+					message: "Login failed",
+					statusCode: StatusCodes.Status401Unauthorized));
 
 			IList<string> roles = await _userManager.GetRolesAsync(user);
 
@@ -90,14 +98,13 @@ namespace AuthApi.Controllers
 				Expires = DateTime.UtcNow.AddDays(7)
 			});
 
-
-			return Ok(ApiResponse<object>.SuccessResponse(
-				new
-				{
-					AccessToken = token,
-					RefreshToken = refreshToken,
-					Roles = roles
-				}, "Login successful"));
+			LoginResponseDto loginResponse = new ()
+			{
+				AccessToken = token,
+				RefreshToken = refreshToken,
+				Roles = roles
+			};
+			return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(loginResponse, "Login successful", StatusCodes.Status200OK));
 		}
 		#endregion
 
