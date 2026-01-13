@@ -17,5 +17,6 @@
   </Folder>
   <Folder Name="/Test/">
     <Project Path="Auth.Test/Auth.Test.csproj" Id="7d4ec2ff-53ff-4560-93a9-669a7f0f036a" />
+    <Project Path="Product.Test/Product.Test.csproj" Id="fdcfc997-0cd8-4097-8b6b-ae08b6c9bb36" />
   </Folder>
 </Solution>
