@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ECommerce.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Infrastructure.IRepository;
 using ProductApi.Models;
@@ -9,6 +10,7 @@ namespace ProductApi.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize(Roles = "Admin,SuperAdmin")]
 	public class CategoriesController : ControllerBase
 	{
 		private readonly ICategoryRepository _repo;
@@ -23,7 +25,7 @@ namespace ProductApi.Controllers
 		}
 
 		#region GetAll
-		[HttpGet(nameof(GetAll))]
+		[HttpGet("GetAll")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetAll()
 		{
