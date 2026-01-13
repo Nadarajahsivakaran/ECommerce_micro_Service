@@ -2,8 +2,8 @@
   <Folder Name="/ApiGateway/">
     <Project Path="ApiGateway/ApiGateway.csproj" Id="1ca991f4-8146-481a-8d4c-1afffda24741" />
   </Folder>
-  <Folder Name="/Client/">
-    <Project Path="E_Commerce_Web/E_Commerce_Web.csproj" Id="0e5d1f7d-214f-403f-b6ad-c756324db8f2" />
+  <Folder Name="/E_Commerce_web/">
+    <Project Path="E_Commerce_web/E_Commerce_Web.csproj" />
   </Folder>
   <Folder Name="/Server/">
     <Project Path="AuthApi.Data/AuthApi.Data.csproj" Id="36a8af82-a8f5-43b7-bb70-18a86ecab956" />
