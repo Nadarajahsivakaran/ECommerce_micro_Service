@@ -10,7 +10,6 @@ namespace ProductApi.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize(Roles = "Admin,SuperAdmin")]
 	public class CategoriesController : ControllerBase
 	{
 		private readonly ICategoryRepository _repo;

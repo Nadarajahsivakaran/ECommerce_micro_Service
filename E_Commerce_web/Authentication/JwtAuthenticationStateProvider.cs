@@ -1,42 +1,58 @@
-﻿//using Microsoft.AspNetCore.Components.Authorization;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
-//public class JwtAuthenticationStateProvider : AuthenticationStateProvider
-//{
-//	private readonly TokenService _tokenService;
-//	private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
+namespace E_Commerce_Web.Authentication
+{
+	public class JwtAuthenticationStateProvider : AuthenticationStateProvider
+	{
+		private readonly TokenService _tokenService;
 
-//	public JwtAuthenticationStateProvider(TokenService tokenService)
-//	{
-//		_tokenService = tokenService;
-//	}
+		public JwtAuthenticationStateProvider(TokenService tokenService)
+		{
+			_tokenService = tokenService;
+		}
 
-//	public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-//	{
-//		var token = await _tokenService.GetAccessTokenAsync();
+		public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+		{
+			var token = await _tokenService.GetAccessTokenAsync();
 
-//		if (string.IsNullOrWhiteSpace(token))
-//			return new AuthenticationState(_anonymous);
+			var identity = string.IsNullOrEmpty(token)
+				? new ClaimsIdentity()
+				: GetClaimsIdentity(token);
 
-//		var claims = new JwtSecurityTokenHandler()
-//			.ReadJwtToken(token)
-//			.Claims;
+			return new AuthenticationState(new ClaimsPrincipal(identity));
+		}
 
-//		var identity = new ClaimsIdentity(claims, "jwt");
-//		return new AuthenticationState(new ClaimsPrincipal(identity));
-//	}
+		public async Task MarkUserAsAuthenticated(string token)
+		{
+			await _tokenService.SetAccessTokenAsync(token);
 
-//	public async Task MarkUserAsAuthenticated(string accessToken, string refreshToken)
-//	{
-//		await _tokenService.SetTokensAsync(accessToken, refreshToken);
-//		NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-//	}
+			var identity = GetClaimsIdentity(token);
+			var user = new ClaimsPrincipal(identity);
 
-//	public async Task Logout()
-//	{
-//		await _tokenService.ClearTokensAsync();
-//		NotifyAuthenticationStateChanged(
-//			Task.FromResult(new AuthenticationState(_anonymous)));
-//	}
-//}
+			NotifyAuthenticationStateChanged(
+				Task.FromResult(new AuthenticationState(user))
+			);
+		}
+
+		public async Task MarkUserAsLoggedOut()
+		{
+			await _tokenService.DeleteAccessTokenAsync();
+
+			var identity = new ClaimsIdentity();
+			var user = new ClaimsPrincipal(identity);
+
+			NotifyAuthenticationStateChanged(
+				Task.FromResult(new AuthenticationState(user))
+			);
+		}
+
+		private ClaimsIdentity GetClaimsIdentity(string token)
+		{
+			var handler = new JwtSecurityTokenHandler();
+			var jwtToken = handler.ReadJwtToken(token);
+			return new ClaimsIdentity(jwtToken.Claims, "jwt");
+		}
+	}
+}

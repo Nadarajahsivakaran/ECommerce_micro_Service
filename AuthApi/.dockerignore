@@ -1,0 +1,20 @@
+# Ignore bin and obj folders
+bin/
+obj/
+
+# Ignore local user settings and hidden files
+*.user
+*.vs
+*.vscode
+*.suo
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore logs and temp
+*.log
+*.tmp
+
+# Ignore Dockerfile backups
+Dockerfile.*

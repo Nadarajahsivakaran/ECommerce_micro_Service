@@ -1,0 +1,72 @@
+﻿/* ==============================
+   NAVBAR MAIN STYLE
+============================== */
+
+.navbar-custom {
+	background-color: #000;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	min-height: 48px;
+}
+
+	/* Logo */
+	.navbar-custom .navbar-brand {
+		font-size: 1.1rem;
+		padding-top: 2px;
+		padding-bottom: 2px;
+	}
+
+	/* Nav links */
+	.navbar-custom .nav-link {
+		color: rgba(255,255,255,0.85);
+		font-weight: 500;
+		padding: 6px 10px;
+		position: relative;
+		transition: all 0.2s ease;
+	}
+
+		/* Hover */
+		.navbar-custom .nav-link:hover {
+			color: #fff;
+		}
+
+		/* Active */
+		.navbar-custom .nav-link.active {
+			color: #fff;
+			font-weight: 600;
+		}
+
+		/* Underline animation */
+		.navbar-custom .nav-link::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			bottom: -2px;
+			width: 0%;
+			height: 2px;
+			background: #fff;
+			transition: width 0.25s ease;
+		}
+
+		.navbar-custom .nav-link:hover::after,
+		.navbar-custom .nav-link.active::after {
+			width: 100%;
+		}
+
+/* Profile avatar */
+.navbar-profile-img {
+	width: 26px;
+	height: 26px;
+	border: 2px solid rgba(255,255,255,0.3);
+}
+
+/* Cart badge */
+.navbar-cart-badge {
+	font-size: 0.6rem;
+	padding: 3px 5px;
+}
+
+/* Logout hover */
+.navbar-logout:hover {
+	color: #ff6b6b !important;
+}
