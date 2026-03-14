@@ -1,9 +1,9 @@
 <Solution>
-  <Folder Name="/ApiGateway/">
-    <Project Path="ApiGateway/ApiGateway.csproj" Id="1ca991f4-8146-481a-8d4c-1afffda24741" />
-  </Folder>
   <Folder Name="/E_Commerce_web/">
     <Project Path="E_Commerce_web/E_Commerce_Web.csproj" />
+  </Folder>
+  <Folder Name="/GateWay/">
+    <Project Path="ApiGateway/ApiGateway.csproj" Id="cb70c9cd-689a-45db-a27d-8ebf7e8b3f34" />
   </Folder>
   <Folder Name="/Server/">
     <Project Path="AuthApi.Data/AuthApi.Data.csproj" Id="36a8af82-a8f5-43b7-bb70-18a86ecab956" />
