@@ -1,6 +1,5 @@
-name: .NET CI
+name: .NET CI + CD
 
-# Trigger workflow on push or pull request to dev branch
 on:
   push:
     branches:
@@ -8,38 +7,50 @@ on:
   pull_request:
     branches:
       - dev
+  workflow_dispatch:
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2) Setup .NET 10 preview SDK
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.100-preview.7
+          dotnet-version: '10.0.x'
 
-      # 3) Install test workload (needed for preview SDK)
-      - name: Install .NET test workload
-        run: dotnet workload install test
-
-      # 4) Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # 5) Build solution
       - name: Build solution
-        run: dotnet build E_Commerce.sln --no-restore --configuration Release --verbosity minimal
+        run: dotnet build E_Commerce.sln --no-restore --configuration Release
 
-      # 6) Run tests for Auth microservice
       - name: Run AuthApi tests
-        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
+        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --no-build
 
-      # 7) Optional: Run all tests via solution (if you add more test projects)
-      # - name: Run all tests via solution
-      #   run: dotnet test ECommerce.sln --configuration Release --collect:"XPlat Code Coverage" --verbosity minimal
+  deploy-auth-to-azure:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish Auth microservice
+        run: dotnet publish Auth/Auth.csproj -c Release -o ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'ecommerce-auth-dev'
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: ./publish
