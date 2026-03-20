@@ -53,7 +53,6 @@ using (var scope = app.Services.CreateScope())
 {
 	var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
 	db.Database.Migrate(); // Creates tables in Azure SQL
-
 	await DbInitializer.SeedAsync(scope.ServiceProvider); // Creates admin user
 }
 
