@@ -98,7 +98,7 @@ namespace AuthApi.Controllers
 				Expires = DateTime.UtcNow.AddDays(7)
 			});
 
-			LoginResponseDto loginResponse = new ()
+			LoginResponseDto loginResponse = new()
 			{
 				AccessToken = token,
 				RefreshToken = refreshToken,
@@ -141,6 +141,12 @@ namespace AuthApi.Controllers
 				RefreshToken = newRefreshToken,
 				savedToken
 			}, "Token refreshed successfully"));
+		}
+
+		[HttpGet("Check")]
+		public async Task<IActionResult> Check()
+		{
+			return Ok("I am from controller");
 		}
 
 	}
