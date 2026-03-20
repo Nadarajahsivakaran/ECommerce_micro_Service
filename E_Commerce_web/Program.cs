@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
 // Authorization for Blazor components
 builder.Services.AddAuthorizationCore();
 
-// Scoped services
+# region Scoped services
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddAuthentication();
 builder.Services.AddCascadingAuthenticationState();
@@ -19,6 +19,7 @@ builder.Services.AddScoped<JwtAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddHttpClient();
+#endregion
 
 // JWT handler for HttpClient
 builder.Services.AddTransient<JwtAuthorizationMessageHandler>();
