@@ -61,7 +61,12 @@ if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
+
+
 }
+
+Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
+Console.WriteLine($"Connection: {builder.Configuration.GetConnectionString("DefaultConnection")}");
 
 // Make Swagger UI default page
 app.MapGet("/", () => Results.Redirect("/swagger"));
