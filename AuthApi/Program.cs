@@ -65,6 +65,7 @@ if (app.Environment.IsDevelopment())
 
 }
 
+
 Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
 Console.WriteLine($"Connection: {builder.Configuration.GetConnectionString("DefaultConnection")}");
 
