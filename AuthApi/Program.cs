@@ -23,25 +23,23 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 #region Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-	// Allow email addresses as usernames
 	options.User.AllowedUserNameCharacters =
 		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-	options.User.RequireUniqueEmail = true; 
+	options.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<AuthDbContext>()
 .AddDefaultTokenProviders();
-
 #endregion
 
 #region Custom services
-builder.Services.AddScoped<IAuthService,AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 #endregion
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 #region Automapper
-builder.Services.AddCommonAutoMapper(typeof(AuthProfile).Assembly );
+builder.Services.AddCommonAutoMapper(typeof(AuthProfile).Assembly);
 #endregion
 
 var app = builder.Build();
@@ -50,12 +48,22 @@ var app = builder.Build();
 app.UseGlobalExceptionHandler();
 #endregion
 
+// 🔥 Run EF Core migrations + seed admin user
+using (var scope = app.Services.CreateScope())
+{
+	var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+	db.Database.Migrate(); // Creates tables in Azure SQL
+
+	await DbInitializer.SeedAsync(scope.ServiceProvider); // Creates admin user
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
 // Make Swagger UI default page
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
