@@ -40,12 +40,11 @@ namespace AuthApi.Controllers
 				return BadRequest(ApiResponse<RegisterDto>.FailResponse(errors, "Registration failed"));
 			}
 
+			// Assign default role
+			if (!await _roleManager.RoleExistsAsync("User"))
+				await _roleManager.CreateAsync(new IdentityRole { Name = "User" });
 			
-			string roleName = dto.Role.ToString(); // enum -> string
-			if (!await _roleManager.RoleExistsAsync(roleName))
-				await _roleManager.CreateAsync(new IdentityRole { Name = roleName });
-
-			IdentityResult roleResult = await _userManager.AddToRoleAsync(user, roleName);
+			IdentityResult roleResult = await _userManager.AddToRoleAsync(user, "User");
 			if (!roleResult.Succeeded)
 			{
 				string errors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
@@ -127,7 +126,7 @@ namespace AuthApi.Controllers
 			// Revoke old token
 			await _authService.RevokeRefreshToken(savedToken.Id);
 
-			// Save new refresh token
+	
 			await _authService.AddAsync(new RefreshToken
 			{
 				Token = newRefreshToken,
