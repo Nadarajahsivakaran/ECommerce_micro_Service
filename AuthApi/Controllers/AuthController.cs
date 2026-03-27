@@ -126,7 +126,7 @@ namespace AuthApi.Controllers
 			// Revoke old token
 			await _authService.RevokeRefreshToken(savedToken.Id);
 
-			// Save new refresh token
+	
 			await _authService.AddAsync(new RefreshToken
 			{
 				Token = newRefreshToken,
