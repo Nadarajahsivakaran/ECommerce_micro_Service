@@ -1,0 +1,26 @@
+﻿/* Header container */
+.navbar {
+	padding: 0.75rem 1rem;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* subtle shadow */
+}
+
+/* Brand styling */
+.navbar-brand {
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+
+/* Nav links styling */
+.nav-link {
+	font-weight: 500;
+	transition: color 0.2s ease;
+}
+
+	.nav-link:hover {
+		color: #ffc107 !important; /* gold hover effect */
+	}
+
+	/* Active link underline */
+	.nav-link.active {
+		text-decoration: underline;
+	}

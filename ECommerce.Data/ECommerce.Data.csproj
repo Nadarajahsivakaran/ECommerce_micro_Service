@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AuthApi.Models\AuthApi.Models.csproj" />
     <ProjectReference Include="..\ECommerce.Models\ECommerce.Models.csproj" />
+    <ProjectReference Include="..\ProductApi.Models\ProductApi.Models.csproj" />
   </ItemGroup>
 
 </Project>

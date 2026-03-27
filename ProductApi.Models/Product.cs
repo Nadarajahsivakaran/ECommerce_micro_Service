@@ -27,7 +27,11 @@ namespace ProductApi.Models
 		public Guid CategoryId { get; set; }
 
 		[ForeignKey(nameof(CategoryId))]
-		public Category? Category { get; set; }
+		public Category Category { get; set; }
 		public bool IsActive { get; set; } = true;
+
+		[MaxLength(500)]
+		[Url]
+		public string? ImageUrl { get; set; }
 	}
 }

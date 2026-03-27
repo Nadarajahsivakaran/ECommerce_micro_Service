@@ -20,26 +20,21 @@ namespace Auth.Test
 
 		public AuthControllerTest()
         {
-			// Mock UserManager
+			
 			var userStore = new Mock<IUserStore<ApplicationUser>>();
 			_mockUserManager = new Mock<UserManager<ApplicationUser>>(
 				userStore.Object, null, null, null, null, null, null, null, null
 			);
 
-			// Mock RoleManager
 			var roleStore = new Mock<IRoleStore<IdentityRole>>();
 			_mockRoleManager = new Mock<RoleManager<IdentityRole>>(
 				roleStore.Object, null, null, null, null
 			);
-
-			// Mock Mapper
+			
 			_mockMapper = new Mock<IMapper>();
 
-			//mock Service
 			_mockAuthService = new Mock<IAuthService>();
 
-
-			// Instantiate controller
 			_controller = new AuthController(
 				_mockUserManager.Object,
 				_mockRoleManager.Object,
@@ -48,7 +43,7 @@ namespace Auth.Test
 			);
 		}
 
-		//Test 1: Invalid ModelState
+		
 		[Fact]
 		public async Task Register_InvalidModelState_ReturnsBadRequest()
         {
@@ -66,7 +61,7 @@ namespace Auth.Test
 			Assert.Equal("Validation failed", response.Message);
 		}
 
-		// Test 2: User creation fails
+	
 		[Fact]
 		public async Task Register_UserCreationFails_ReturnsBadRequest()
 		{
@@ -90,7 +85,7 @@ namespace Auth.Test
 			Assert.Equal("Registration failed", response.Message);
 		}
 
-		// Test 3: Role does not exist, needs creation
+		
 		[Fact]
 		public async Task Register_RoleDoesNotExist_CreatesRoleAndReturnsOk()
 		{
@@ -119,7 +114,7 @@ namespace Auth.Test
 			Assert.Equal("test@test.com", response.Data.Email);
 		}
 
-		// Test 4: Role exists, just assign role
+		
 		[Fact]
 		public async Task Register_RoleExists_AssignsRoleAndReturnsOk()
 		{
@@ -147,7 +142,6 @@ namespace Auth.Test
 			Assert.Equal("test2@test.com", response.Data.Email);
 		}
 
-		 //Test 5: Assign role fails
 		[Fact]
 		public async Task Register_AssignRoleFails_ReturnsBadRequest()
 		{

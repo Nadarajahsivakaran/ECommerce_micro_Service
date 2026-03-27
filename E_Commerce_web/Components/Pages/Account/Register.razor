@@ -1,0 +1,47 @@
+﻿@page "/Account/Register"
+
+<div class="d-flex flex-column min-vh-100">
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h4 class="text-center mb-3">Register</h4>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label>Full Name</label>
+                            <input asp-for="Register.FullName" class="form-control" />
+                            <span asp-validation-for="Register.FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input asp-for="Register.Email" class="form-control" />
+                            <span asp-validation-for="Register.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Password</label>
+                            <input asp-for="Register.Password" type="password" class="form-control" />
+                            <span asp-validation-for="Register.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Confirm Password</label>
+                            <input asp-for="Register.ConfirmPassword" type="password" class="form-control" />
+                            <span asp-validation-for="Register.ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <button class="btn btn-success w-100">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a asp-page="Login">Already have an account? Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

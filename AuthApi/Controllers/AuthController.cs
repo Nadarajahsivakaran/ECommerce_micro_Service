@@ -2,6 +2,7 @@
 using AuthApi.Models;
 using AuthApi.Models.DTO;
 using AutoMapper;
+using Azure.Core;
 using ECommerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,11 @@ namespace AuthApi.Controllers
 	{
 		private readonly UserManager<ApplicationUser> _userManager = userManager;
 		private readonly RoleManager<IdentityRole> _roleManager = roleManager;
-        private readonly IAuthService _authService = authService;
+		private readonly IAuthService _authService = authService;
 		private readonly IMapper _mapper = mapper;
 
-        [HttpPost(nameof(Register))]
+		#region Register
+		[HttpPost(nameof(Register))]
 		public async Task<IActionResult> Register(RegisterDto dto)
 		{
 			if (!ModelState.IsValid)
@@ -38,7 +40,7 @@ namespace AuthApi.Controllers
 				return BadRequest(ApiResponse<RegisterDto>.FailResponse(errors, "Registration failed"));
 			}
 
-		
+			// Assign default role
 			if (!await _roleManager.RoleExistsAsync("User"))
 				await _roleManager.CreateAsync(new IdentityRole { Name = "User" });
 			
@@ -50,9 +52,11 @@ namespace AuthApi.Controllers
 			}
 
 			RegisterResponseDto response = _mapper.Map<RegisterResponseDto>(user);
-			return Ok(ApiResponse<RegisterResponseDto>.SuccessResponse(response, "User registered successfully",201));
+			return Ok(ApiResponse<RegisterResponseDto>.SuccessResponse(response, "User registered successfully", 201));
 		}
+		#endregion
 
+		#region Login
 		[HttpPost(nameof(Login))]
 		public async Task<IActionResult> Login(LoginDto dto)
 		{
@@ -66,14 +70,83 @@ namespace AuthApi.Controllers
 			}
 
 			ApplicationUser? user = await _userManager.FindByEmailAsync(dto.Email);
-			if (user == null) return Unauthorized(ApiResponse<LoginDto>.FailResponse("Invalid credentials", "Login failed", 401));
+			if (user == null)
+				return Unauthorized(ApiResponse<LoginDto>.FailResponse(
+					error: "Invalid credentials",
+					message: "Login failed",
+					statusCode: StatusCodes.Status401Unauthorized));
 
 			if (!await _userManager.CheckPasswordAsync(user, dto.Password))
-				return Unauthorized(ApiResponse<LoginDto>.FailResponse("Invalid credentials", "Login failed", 401));
+				return Unauthorized(ApiResponse<LoginDto>.FailResponse(
+					error: "Invalid credentials",
+					message: "Login failed",
+					statusCode: StatusCodes.Status401Unauthorized));
 
 			IList<string> roles = await _userManager.GetRolesAsync(user);
+
+			// Generate Access Token
 			string token = _authService.CreateToken(user, roles);
-			return Ok(ApiResponse<string>.SuccessResponse(token, "Login successful"));
+
+			// Generate Refresh Token
+			string refreshToken = _authService.GenerateRefreshToken();
+
+			await _authService.AddAsync(new RefreshToken
+			{
+				Token = refreshToken,
+				UserId = user.Id,
+				Expires = DateTime.UtcNow.AddDays(7)
+			});
+
+			LoginResponseDto loginResponse = new()
+			{
+				AccessToken = token,
+				RefreshToken = refreshToken,
+				Roles = roles
+			};
+			return Ok(ApiResponse<LoginResponseDto>.SuccessResponse(loginResponse, "Login successful", StatusCodes.Status200OK));
 		}
+		#endregion
+
+		[HttpPost(nameof(Refresh))]
+		public async Task<IActionResult> Refresh(string refreshToken)
+		{
+			RefreshToken savedToken = await _authService.FindSingleAsync(t => t.Token == refreshToken);
+
+
+			if (savedToken == null || savedToken.IsRevoked || savedToken.Expires < DateTime.UtcNow)
+				return Unauthorized(ApiResponse<string>.FailResponse("Invalid or expired refresh token"));
+
+			ApplicationUser? user = await _userManager.FindByIdAsync(savedToken.UserId);
+			if (user == null) return Unauthorized(ApiResponse<string>.FailResponse("User not found"));
+
+			IList<string> roles = await _userManager.GetRolesAsync(user);
+			string newAccessToken = _authService.CreateToken(user, roles);
+			string newRefreshToken = _authService.GenerateRefreshToken();
+
+			// Revoke old token
+			await _authService.RevokeRefreshToken(savedToken.Id);
+
+			// Save new refresh token
+			await _authService.AddAsync(new RefreshToken
+			{
+				Token = newRefreshToken,
+				UserId = user.Id,
+				Expires = DateTime.UtcNow.AddDays(7)
+			});
+
+			return Ok(ApiResponse<object>.SuccessResponse(new
+			{
+				AccessToken = newAccessToken,
+				RefreshToken = newRefreshToken,
+				savedToken
+			}, "Token refreshed successfully"));
+		}
+
+		[HttpGet("Check")]
+		public async Task<IActionResult> Check()
+		{
+			return Ok("I am from controller");
+		}
+
 	}
 }

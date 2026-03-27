@@ -1,26 +1,29 @@
 ﻿using AuthApi.Data.IRepository;
 using AuthApi.Models;
+using ECommerce.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace AuthApi.Data.Repository
 {
-    public class AuthService : IAuthService
-    {
+	public class AuthService : GenericRepository<RefreshToken>, IAuthService
+	{
 		private readonly IConfiguration _config;
 
-		public AuthService(IConfiguration config) { 
-            _config = config;
-        }
+		public AuthService(AuthDbContext context, IConfiguration config) : base(context)
+		{
+			_config = config;
+		}
 
-        public string CreateToken(ApplicationUser user, IList<string> roles)
-        {
+		public string CreateToken(ApplicationUser user, IList<string> roles)
+		{
 			var claims = new List<Claim>
 			{
-                new(JwtRegisteredClaimNames.Sub, user.Id),
+				new(JwtRegisteredClaimNames.Sub, user.Id),
 				new(JwtRegisteredClaimNames.Email, user.Email),
 				new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 			};
@@ -44,5 +47,25 @@ namespace AuthApi.Data.Repository
 			return new JwtSecurityTokenHandler().WriteToken(token);
 		}
 
-	}
+		public string GenerateRefreshToken()
+		{
+			byte[] randomBytes = new byte[32];
+			RNGCryptoServiceProvider rng = new();
+			rng.GetBytes(randomBytes);
+			return Convert.ToBase64String(randomBytes);
+		}
+
+		public async Task RevokeRefreshToken(Guid id)
+		{
+			RefreshToken? token = await GetByIdAsync(id);
+
+            if (token == null)
+				throw new KeyNotFoundException("Refresh token not found");
+
+			token.IsRevoked = true;
+			await Update(token);
+		}
+
+       
+    }
 }

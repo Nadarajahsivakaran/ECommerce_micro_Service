@@ -1,5 +1,6 @@
 ﻿using ECommerce.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ECommerce.Data
 {
@@ -25,26 +26,52 @@ namespace ECommerce.Data
         {
 			_dbSet.Remove(entity);
 		}
-
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
-        {
-			return await _dbSet.ToListAsync();
-		}
-
+		
         public async Task<TEntity?> GetByIdAsync(Guid id)
         {
-			return await _dbSet.FirstOrDefaultAsync(e => e.Id == id);
+			return await _dbSet.FindAsync(id);
 		}
 
-  //      public async Task<bool> SaveChangesAsync()
-  //      {
-		//	return await _context.SaveChangesAsync() > 0;
-		//}
-
-        public async void Update(TEntity entity)
+        public async Task Update(TEntity entity)
         {
 			entity.UpdatedAt = DateTime.UtcNow;
 			_dbSet.Update(entity);
+			await _context.SaveChangesAsync();
 		}
-    }
+
+		// Flexible FindAsync
+		public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate,
+			params Expression<Func<TEntity, object>>[] includes)
+		{
+			IQueryable<TEntity> query = _context.Set<TEntity>();
+
+			// Apply includes
+			if (includes != null && includes.Length > 0)
+			{
+				foreach (var include in includes)
+				{
+					query = query.Include(include);
+				}
+			}
+
+			// Apply predicate if provided
+			if (predicate != null)
+				query = query.Where(predicate);
+
+			return await query.ToListAsync();
+		}
+
+		// Optional: Find a single entity
+		public async Task<TEntity> FindSingleAsync(Expression<Func<TEntity, bool>> predicate,
+			params Expression<Func<TEntity, object>>[] includes)
+		{
+			IQueryable<TEntity> query = _context.Set<TEntity>();
+			if (includes != null)
+			{
+				foreach (var include in includes)
+					query = query.Include(include);
+			}
+			return await query.FirstOrDefaultAsync(predicate);
+		}
+	}
 }

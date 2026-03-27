@@ -1,0 +1,24 @@
+﻿@using E_Commerce_Web.Components.Pages.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="d-flex flex-column min-vh-100">
+    <Header />
+
+    <div class="flex-grow-1 container mt-4">
+        @Body
+    </div>
+
+    <Footer />
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthProvider.AuthenticationStateChanged += async _ =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
+    }
+}

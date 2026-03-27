@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: e_commerce-db
+    environment:
+      SA_PASSWORD: "YourStrong@Password"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/1433"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  productapi:
+    build:
+      context: .
+      dockerfile: ProductApi/Dockerfile
+    container_name: e_commerce-productapi
+    ports:
+      - "5002:80"
+    environment:
+      ASPNETCORE_URLS: "http://+:80"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ECommerceDb;User Id=sa;Password=YourStrong@Password;TrustServerCertificate=True"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mssql_data:

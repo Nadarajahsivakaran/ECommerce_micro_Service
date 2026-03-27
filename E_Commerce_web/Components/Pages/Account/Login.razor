@@ -1,0 +1,77 @@
+﻿@page "/Account/Login"
+@using System.ComponentModel.DataAnnotations
+@using AuthApi.Models.DTO
+@using ECommerce.Models
+@using E_Commerce_Web.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<EditForm Model="login" OnValidSubmit="HandleLogin" FormName="LoginForm">
+    <DataAnnotationsValidator />
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+
+                    <h4 class="text-center mb-3">Login</h4>
+
+                    
+
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <InputText class="form-control" @bind-Value="login.Email" />
+                        <ValidationMessage For="@(() => login.Email)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Password</label>
+                        <InputText type="password" class="form-control" @bind-Value="login.Password" />
+                        <ValidationMessage For="@(() => login.Password)" />
+                    </div>
+
+                    <button class="btn btn-primary w-100" type="submit">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private LoginDto login = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        var client = HttpClientFactory.CreateClient();
+        client.BaseAddress = new Uri("https://localhost:5000/api/");
+
+        try
+        {
+            var response = await client.PostAsJsonAsync("Auth/Login", login);
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"Error: {response.StatusCode}";
+                return;
+            }
+
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<LoginResponseDto>>();
+
+            if (apiResponse?.Data == null || string.IsNullOrEmpty(apiResponse.Data.AccessToken))
+            {
+                errorMessage = "Login failed";
+                return;
+            }
+
+            await ((JwtAuthenticationStateProvider)AuthStateProvider).MarkUserAsAuthenticated(apiResponse.Data.AccessToken);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Exception: {ex.Message}";
+        }
+    }
+}
