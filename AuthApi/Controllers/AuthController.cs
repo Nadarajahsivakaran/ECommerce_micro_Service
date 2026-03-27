@@ -40,7 +40,7 @@ namespace AuthApi.Controllers
 				return BadRequest(ApiResponse<RegisterDto>.FailResponse(errors, "Registration failed"));
 			}
 
-			// 4️⃣ Ensure role exists and assign it
+			
 			string roleName = dto.Role.ToString(); // enum -> string
 			if (!await _roleManager.RoleExistsAsync(roleName))
 				await _roleManager.CreateAsync(new IdentityRole { Name = roleName });
