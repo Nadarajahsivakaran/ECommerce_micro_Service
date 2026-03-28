@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthApi.Controllers
 {
+
+	
 	[Route("api/[controller]")]
 	[ApiController]
 	public class AuthController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IAuthService authService, IMapper mapper) : ControllerBase
