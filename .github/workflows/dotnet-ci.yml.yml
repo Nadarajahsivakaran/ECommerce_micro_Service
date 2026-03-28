@@ -30,7 +30,9 @@ jobs:
 
       # ✅ Restore (FIXED PATH)
       - name: Restore dependencies
-        run: dotnet restore E_Commerce/E_Commerce.sln
+        run: E_Commerce.sln --no-restore --configuration Release
+
+        
 
       # ✅ Build (FIXED PATH)
       - name: Build solution
