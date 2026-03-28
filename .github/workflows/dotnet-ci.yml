@@ -26,10 +26,10 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore E_Commerce.sln
+        run: dotnet restore E_Commerce.slnx
 
       - name: Build solution
-        run: dotnet build E_Commerce.sln --no-restore --configuration Release
+        run: dotnet build E_Commerce.slnx --no-restore --configuration Release
 
       - name: Run AuthApi tests
         run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --no-build
