@@ -34,26 +34,4 @@ jobs:
       - name: Run AuthApi tests
         run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --no-build
 
-  deploy-auth-to-azure:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/Dev'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Publish Auth microservice
-        run: dotnet publish Auth/Auth.csproj -c Release -o ./publish
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'ecommerce-auth-dev'
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: ./publish
+  
