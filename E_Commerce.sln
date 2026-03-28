@@ -1,1 +1,22 @@
-﻿
+﻿<Solution>
+  <Folder Name="/E_Commerce_web/">
+    <Project Path="E_Commerce_web/E_Commerce_Web.csproj" />
+  </Folder>
+  <Folder Name="/GateWay/">
+    <Project Path="ApiGateway/ApiGateway.csproj" Id="cb70c9cd-689a-45db-a27d-8ebf7e8b3f34" />
+  </Folder>
+  <Folder Name="/Server/">
+    <Project Path="AuthApi.Data/AuthApi.Data.csproj" Id="36a8af82-a8f5-43b7-bb70-18a86ecab956" />
+    <Project Path="AuthApi.Models/AuthApi.Models.csproj" Id="b9ad3582-8346-4d6d-8591-a91e905e4be1" />
+    <Project Path="AuthApi/AuthApi.csproj" Id="20578702-e25f-40dd-9b2b-d766e7f56633" />
+    <Project Path="ECommerce.Data/ECommerce.Data.csproj" />
+    <Project Path="ECommerce.Models/ECommerce.Models.csproj" />
+    <Project Path="ProductApi.Infrastructure/ProductApi.Infrastructure.csproj" />
+    <Project Path="ProductApi.Models/ProductApi.Models.csproj" />
+    <Project Path="ProductApi/ProductApi.csproj" />
+  </Folder>
+  <Folder Name="/Test/">
+    <Project Path="Auth.Test/Auth.Test.csproj" Id="7d4ec2ff-53ff-4560-93a9-669a7f0f036a" />
+    <Project Path="Product.Test/Product.Test.csproj" Id="fdcfc997-0cd8-4097-8b6b-ae08b6c9bb36" />
+  </Folder>
+</Solution>
