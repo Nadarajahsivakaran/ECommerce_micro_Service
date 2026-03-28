@@ -125,7 +125,6 @@ namespace AuthApi.Controllers
 			string newAccessToken = _authService.CreateToken(user, roles);
 			string newRefreshToken = _authService.GenerateRefreshToken();
 
-			// Revoke old token
 			await _authService.RevokeRefreshToken(savedToken.Id);
 
 	
