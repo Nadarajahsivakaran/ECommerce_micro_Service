@@ -14,34 +14,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Debug (optional but useful)
       - name: List files (debug)
         run: ls -R
 
-      # ✅ Setup .NET (stable version)
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      # ✅ Restore (FIXED PATH)
       - name: Restore dependencies
-        run: E_Commerce.sln --no-restore --configuration Release
+        run: dotnet restore E_Commerce.sln
 
-        
-
-      # ✅ Build (FIXED PATH)
       - name: Build solution
-        run: dotnet build E_Commerce/E_Commerce.sln --no-restore --configuration Release
+        run: dotnet build E_Commerce.sln --no-restore --configuration Release
 
-      # ✅ Test (FIXED PATH - adjust if needed)
-      - name: Run tests
-        run: dotnet test E_Commerce/Test/Auth.Test.csproj --configuration Release --no-build
-
+      - name: Run AuthApi tests
+        run: dotnet test Auth.Test/Auth.Test.csproj --configuration Release --no-build
 
   deploy-auth-to-azure:
     needs: build-and-test
@@ -49,21 +40,17 @@ jobs:
     if: github.ref == 'refs/heads/Dev'
 
     steps:
-      # ✅ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Setup .NET
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      # ✅ Publish Auth API (FIXED PATH)
       - name: Publish Auth microservice
-        run: dotnet publish E_Commerce/Server/AuthApi/AuthApi.csproj -c Release -o ./publish
+        run: dotnet publish AuthApi/AuthApi.csproj -c Release -o ./publish
 
-      # ✅ Deploy to Azure
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
