@@ -28,4 +28,20 @@ jobs:
           name: blazor-artifact
           path: ./publish
 
- 
+  deploy:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blazor-artifact
+          path: ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'ECommerce-Blazor-web'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
