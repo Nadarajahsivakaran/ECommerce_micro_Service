@@ -17,10 +17,10 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '8.0.x'
 
       - name: Publish Blazor Project
-        run: dotnet publish E_Commerce_web/E_Commerce_web.csproj -c Release -o ./publish
+        run: dotnet publish E_Commerce_web/E_Commerce_Web.csproj -c Release -o ./publish
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -28,19 +28,4 @@ jobs:
           name: blazor-artifact
           path: ./publish
 
-  deploy:
-    runs-on: windows-latest
-    needs: build
-
-    steps:
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: blazor-artifact
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'ECommerce-Blazor-web'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./publish
+ 
