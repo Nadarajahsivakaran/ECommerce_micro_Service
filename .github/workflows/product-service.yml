@@ -27,19 +27,19 @@ jobs:
           name: product
           path: ./publish
 
-  deploy:
-    runs-on: windows-latest
-    needs: build
+  # deploy:
+  #   runs-on: windows-latest
+  #   needs: build
 
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: product
+  #   steps:
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: product
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'ECommerce-Product-Service'
-          publish-profile: ${{ secrets.PRODUCT_PUBLISH_PROFILE }}
-          package: .
+  #     - name: Deploy to Azure Web App
+  #       uses: azure/webapps-deploy@v3
+  #       with:
+  #         app-name: 'ECommerce-Product-Service'
+  #         publish-profile: ${{ secrets.PRODUCT_PUBLISH_PROFILE }}
+  #         package: .
