@@ -40,6 +40,6 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'ECommerce-Product-Service'
+          app-name: 'Product-Service'
           publish-profile: ${{ secrets.PRODUCT_PUBLISH_PROFILE }}
-          package: .
+          package: ./publish
