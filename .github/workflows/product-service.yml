@@ -11,7 +11,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -21,10 +22,10 @@ jobs:
       - name: Publish Product
         run: dotnet publish ProductApi/ProductApi.csproj -c Release -o ./publish
 
-      - name: Upload artifact
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: product
+          name: product-artifact
           path: ./publish
 
   deploy:
@@ -32,14 +33,14 @@ jobs:
     needs: build
 
     steps:
-      - name: Download artifact
+      - name: Download Build Artifac
         uses: actions/download-artifact@v4
         with:
           name: product
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure Product Api
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'ECommerce-Product-Service'
+          app-name: 'Product-Service'
           publish-profile: ${{ secrets.PRODUCT_PUBLISH_PROFILE }}
           package: .

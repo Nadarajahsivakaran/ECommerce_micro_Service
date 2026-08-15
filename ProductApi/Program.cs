@@ -1,4 +1,4 @@
-﻿using ECommerce.Data;
+﻿ using ECommerce.Data;
 using ECommerce.Data.Middleware;
 using ECommerce.Data.Profiles;
 using Microsoft.EntityFrameworkCore;
