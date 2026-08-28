@@ -23,7 +23,7 @@ namespace CartApi.Infrastructure.Repository
 			if (data.IsNullOrEmpty)
 				return null;
 
-			return JsonSerializer.Deserialize<Cart>(data!);
+			return JsonSerializer.Deserialize<Cart>((string)data!);
 		}
 
 		public async Task SaveCartAsync(Cart cart)

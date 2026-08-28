@@ -15,7 +15,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(
 	ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"))
 );
 builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<CartService.Application.Services.CartService>();
+//builder.Services.AddScoped<CartService.Application.Services.CartService>();
 
 builder.Services.AddOpenApi();
 
