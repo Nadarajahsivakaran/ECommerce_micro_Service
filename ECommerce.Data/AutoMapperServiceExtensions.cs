@@ -7,7 +7,7 @@ namespace ECommerce.Data
 	{
 		public static IServiceCollection AddCommonAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
 		{
-			services.AddAutoMapper(assemblies);
+			services.AddAutoMapper(cfg => cfg.AddMaps(assemblies));
 			return services;
 		}
 	}

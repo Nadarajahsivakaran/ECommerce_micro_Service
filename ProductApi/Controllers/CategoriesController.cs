@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using ECommerce.Caching;
 using ECommerce.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Infrastructure.IRepository;
 using ProductApi.Models;
@@ -15,12 +15,18 @@ namespace ProductApi.Controllers
 		private readonly ICategoryRepository _repo;
 		private readonly IMapper _mapper;
 		private readonly ILogger<CategoriesController> _logger;
+		private readonly ICacheService _cache;
 
-		public CategoriesController(ICategoryRepository repo, IMapper mapper, ILogger<CategoriesController> logger)
+		private const string AllCategoriesCacheKey = "categories:all";
+		private static string CategoryCacheKey(Guid id) => $"category:{id}";
+		private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
+
+		public CategoriesController(ICategoryRepository repo, IMapper mapper, ILogger<CategoriesController> logger, ICacheService cache)
 		{
 			_repo = repo;
 			_mapper = mapper;
 			_logger = logger;
+			_cache = cache;
 		}
 
 		#region GetAll
@@ -28,8 +34,15 @@ namespace ProductApi.Controllers
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		public async Task<ActionResult<ApiResponse<IEnumerable<CategoryDto>>>> GetAll()
 		{
-			IEnumerable<Category> categories = await _repo.GetAllAsync();
-			IEnumerable<CategoryDto> result = _mapper.Map<IEnumerable<CategoryDto>>(categories);
+			IEnumerable<CategoryDto> result = await _cache.GetOrCreateAsync(
+				AllCategoriesCacheKey,
+				async () =>
+				{
+					IEnumerable<Category> categories = await _repo.GetAllAsync();
+					return _mapper.Map<IEnumerable<CategoryDto>>(categories);
+				},
+				CacheDuration);
+
 			return Ok(ApiResponse<IEnumerable<CategoryDto>>.SuccessResponse(result, "Categories retrieved successfully"));
 		}
 		#endregion
@@ -47,14 +60,21 @@ namespace ProductApi.Controllers
 				return BadRequest(ApiResponse<string>.FailResponse("InvalidId", "ID cannot be empty or 0"));
 			}
 
-			Category? category = await _repo.GetByIdAsync(id);
-			if (category == null)
+			CategoryDto? result = await _cache.GetOrCreateAsync(
+				CategoryCacheKey(id),
+				async () =>
+				{
+					Category? category = await _repo.GetByIdAsync(id);
+					return category is null ? null : _mapper.Map<CategoryDto>(category);
+				},
+				CacheDuration);
+
+			if (result == null)
 			{
 				_logger.LogWarning("Category not found with Id {CategoryId}", id);
 				return NotFound(ApiResponse<string>.FailResponse("CategoryNotFound", "No category exists with the given ID"));
 			}
 
-			CategoryDto result = _mapper.Map<CategoryDto>(category);
 			return Ok(ApiResponse<CategoryDto>.SuccessResponse(result, "Category retrieved successfully"));
 		}
 		#endregion
@@ -82,6 +102,9 @@ namespace ProductApi.Controllers
 
 			Category category = _mapper.Map<Category>(dto);
 			await _repo.AddAsync(category);
+
+			await _cache.RemoveAsync(AllCategoriesCacheKey);
+
 			CategoryDto categoryDto = _mapper.Map<CategoryDto>(category);
 
 			return StatusCode(StatusCodes.Status201Created,
@@ -126,6 +149,9 @@ namespace ProductApi.Controllers
 
 			_mapper.Map(dto, category);
 			await _repo.Update(category);
+
+			await _cache.RemoveAsync(CategoryCacheKey(id));
+			await _cache.RemoveAsync(AllCategoriesCacheKey);
 
 			CategoryDto result = _mapper.Map<CategoryDto>(category);
 			return Ok(ApiResponse<CategoryDto>.SuccessResponse(result, "Category updated successfully"));

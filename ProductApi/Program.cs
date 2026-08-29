@@ -1,10 +1,11 @@
-﻿using ECommerce.Data;
+﻿ using ECommerce.Data;
 using ECommerce.Data.Middleware;
 using ECommerce.Data.Profiles;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Infrastructure;
 using ProductApi.Infrastructure.IRepository;
 using ProductApi.Infrastructure.Repository;
+using ECommerce.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 #region AutoMapper
 builder.Services.AddCommonAutoMapper(typeof(ProductProfile).Assembly);
 #endregion
+
+builder.Services.AddRedisCaching(builder.Configuration);
 
 var app = builder.Build();
 

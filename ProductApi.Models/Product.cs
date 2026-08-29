@@ -18,10 +18,6 @@ namespace ProductApi.Models
 		[Column(TypeName = "decimal(18,2)")]
 		public decimal Price { get; set; }
 
-		[Required]
-		[Range(0, int.MaxValue)]
-		public int Stock { get; set; }
-
 		// Foreign Key
 		[Required]
 		public Guid CategoryId { get; set; }
