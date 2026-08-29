@@ -11,8 +11,7 @@ namespace ECommerce.Caching
 			var connectionString = configuration.GetConnectionString("Redis")
 				?? throw new InvalidOperationException("Redis connection string 'Redis' is not configured.");
 
-			services.AddSingleton<IConnectionMultiplexer>(
-				ConnectionMultiplexer.Connect(connectionString));
+			services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(connectionString));
 
 			services.AddSingleton<ICacheService, RedisCacheService>();
 

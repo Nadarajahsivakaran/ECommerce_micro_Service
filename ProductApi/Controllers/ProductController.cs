@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using ECommerce.Caching;
 using ECommerce.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Infrastructure.IRepository;
 using ProductApi.Models;
@@ -17,12 +17,17 @@ namespace ProductApi.Controllers
 		private readonly IProductRepository _productRepository;
 		private readonly IMapper _mapper;
 		private readonly ILogger<ProductController> _logger;
+		private readonly ICacheService _cache;
+		private const string AllProductsCacheKey = "products:all";
+		private static string ProductCacheKey(Guid id) => $"product:{id}";
+		private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
 
-		public ProductController(IProductRepository productRepository, IMapper mapper, ILogger<ProductController> logger)
+		public ProductController(IProductRepository productRepository, IMapper mapper, ILogger<ProductController> logger, ICacheService cache)
 		{
 			_productRepository = productRepository;
 			_mapper = mapper;
 			_logger = logger;
+			_cache = cache;
 		}
 
 		#region GetAll
@@ -31,9 +36,16 @@ namespace ProductApi.Controllers
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<ApiResponse<IEnumerable<ProductDto>>>> GetAll()
 		{
-			IEnumerable<Product> products = await _productRepository.GetAllAsync(null, p => p.Category);
+			IEnumerable<ProductDto> result = await _cache.GetOrCreateAsync(
+				AllProductsCacheKey,
+				async () =>
+				{
+					IEnumerable<Product> products = await _productRepository.GetAllAsync(null, p => p.Category);
+					return _mapper.Map<IEnumerable<ProductDto>>(products);
+				},
+				CacheDuration);
 
-			if (products == null || !products.Any())
+			if (result == null || !result.Any())
 			{
 				_logger.LogWarning("GetAll called but no products found.");
 				return NotFound(ApiResponse<IEnumerable<ProductDto>>.FailResponse(
@@ -43,7 +55,6 @@ namespace ProductApi.Controllers
 				));
 			}
 
-			IEnumerable<ProductDto> result = _mapper.Map<IEnumerable<ProductDto>>(products);
 			return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResponse(result, "Products retrieved successfully"));
 		}
 		#endregion
@@ -65,9 +76,16 @@ namespace ProductApi.Controllers
 				));
 			}
 
-			Product product = await _productRepository.FindSingleAsync(p => p.Id == id, p => p.Category);
+			ProductDto? result = await _cache.GetOrCreateAsync(
+				ProductCacheKey(id),
+				async () =>
+				{
+					Product product = await _productRepository.FindSingleAsync(p => p.Id == id, p => p.Category);
+					return product is null ? null : _mapper.Map<ProductDto>(product);
+				},
+				CacheDuration);
 
-			if (product == null)
+			if (result == null)
 			{
 				_logger.LogWarning("GetById: Product not found for ID {ProductId}.", id);
 				return NotFound(ApiResponse<string>.FailResponse(
@@ -76,8 +94,6 @@ namespace ProductApi.Controllers
 						statusCode: 404
 					));
 			}
-
-			ProductDto result = _mapper.Map<ProductDto>(product);
 
 			return Ok(ApiResponse<ProductDto>.SuccessResponse(
 				result,
@@ -121,6 +137,7 @@ namespace ProductApi.Controllers
 
 			Product product = _mapper.Map<Product>(dto);
 			await _productRepository.AddAsync(product);
+			await _cache.RemoveAsync(AllProductsCacheKey);
 
 			ProductDto result = _mapper.Map<ProductDto>(product);
 
@@ -191,6 +208,10 @@ namespace ProductApi.Controllers
 
 			_mapper.Map(dto, product);
 			await _productRepository.Update(product);
+
+			await _cache.RemoveAsync(ProductCacheKey(id));    
+			await _cache.RemoveAsync(AllProductsCacheKey);
+
 			ProductDto result = _mapper.Map<ProductDto>(product);
 
 			return Ok(ApiResponse<ProductDto>.SuccessResponse(
