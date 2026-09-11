@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerce.Data", "ECommerce
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductApi.Models", "ProductApi.Models\ProductApi.Models.csproj", "{0757CAD7-55B2-49CC-A277-45EED2867882}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService.Data", "AuthService.Data\AuthService.Data.csproj", "{127A57B3-A81B-4561-BC94-A7EABC969E1C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductApi", "ProductApi\ProductApi.csproj", "{163E39C8-3703-4D8C-9937-139176D4C0EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductApi.Infrastructure", "ProductApi.Infrastructure\ProductApi.Infrastructure.csproj", "{265FB99C-923D-4217-AB5F-0B02AEA4433E}"
@@ -133,18 +131,6 @@ Global
 		{0757CAD7-55B2-49CC-A277-45EED2867882}.Release|x64.Build.0 = Release|Any CPU
 		{0757CAD7-55B2-49CC-A277-45EED2867882}.Release|x86.ActiveCfg = Release|Any CPU
 		{0757CAD7-55B2-49CC-A277-45EED2867882}.Release|x86.Build.0 = Release|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Debug|x64.Build.0 = Debug|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Debug|x86.Build.0 = Debug|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Release|x64.ActiveCfg = Release|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Release|x64.Build.0 = Release|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Release|x86.ActiveCfg = Release|Any CPU
-		{127A57B3-A81B-4561-BC94-A7EABC969E1C}.Release|x86.Build.0 = Release|Any CPU
 		{163E39C8-3703-4D8C-9937-139176D4C0EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{163E39C8-3703-4D8C-9937-139176D4C0EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{163E39C8-3703-4D8C-9937-139176D4C0EE}.Debug|x64.ActiveCfg = Debug|Any CPU

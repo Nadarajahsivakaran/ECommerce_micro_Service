@@ -2,15 +2,12 @@
 using AuthApi.Models;
 using AuthApi.Models.DTO;
 using AutoMapper;
-using Azure.Core;
 using ECommerce.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthApi.Controllers
 {
-
-	
 	[Route("api/[controller]")]
 	[ApiController]
 	public class AuthController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IAuthService authService, IMapper mapper) : ControllerBase
@@ -109,6 +106,7 @@ namespace AuthApi.Controllers
 		}
 		#endregion
 
+		#region Refresh
 		[HttpPost(nameof(Refresh))]
 		public async Task<IActionResult> Refresh(string refreshToken)
 		{
@@ -126,7 +124,6 @@ namespace AuthApi.Controllers
 			string newRefreshToken = _authService.GenerateRefreshToken();
 
 			await _authService.RevokeRefreshToken(savedToken.Id);
-
 	
 			await _authService.AddAsync(new RefreshToken
 			{
@@ -142,12 +139,7 @@ namespace AuthApi.Controllers
 				savedToken
 			}, "Token refreshed successfully"));
 		}
-
-		[HttpGet("Check")]
-		public async Task<IActionResult> Check()
-		{
-			return Ok("I am from controller");
-		}
+		#endregion
 
 	}
 }

@@ -1,11 +1,13 @@
-﻿ using ECommerce.Data;
+﻿using ECommerce.Caching;
+using ECommerce.Data;
 using ECommerce.Data.Middleware;
 using ECommerce.Data.Profiles;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Infrastructure;
 using ProductApi.Infrastructure.IRepository;
 using ProductApi.Infrastructure.Repository;
-using ECommerce.Caching;
+using Scalar.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 
 #region Db connection
 builder.Services.AddDbContext<ProductDbContext>(options =>
@@ -43,14 +45,17 @@ builder.Services.AddCommonAutoMapper(typeof(ProductProfile).Assembly);
 #endregion
 
 builder.Services.AddRedisCaching(builder.Configuration);
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 #region Middleware + Swagger
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+	//app.UseSwagger();
+	//app.UseSwaggerUI();
+	app.MapOpenApi();
+	app.MapScalarApiReference();
 }
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
