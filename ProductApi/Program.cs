@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen();
 
 #region Db connection
 builder.Services.AddDbContext<ProductDbContext>(options =>
@@ -52,10 +52,10 @@ var app = builder.Build();
 #region Middleware + Swagger
 if (app.Environment.IsDevelopment())
 {
-	//app.UseSwagger();
-	//app.UseSwaggerUI();
-	app.MapOpenApi();
-	app.MapScalarApiReference();
+	app.UseSwagger();
+	app.UseSwaggerUI();
+	//app.MapOpenApi();
+	//app.MapScalarApiReference();
 }
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
