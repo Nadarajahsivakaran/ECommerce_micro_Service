@@ -45,7 +45,7 @@ builder.Services.AddCommonAutoMapper(typeof(ProductProfile).Assembly);
 #endregion
 
 builder.Services.AddRedisCaching(builder.Configuration);
-builder.Services.AddOpenApi();
+
 
 var app = builder.Build();
 

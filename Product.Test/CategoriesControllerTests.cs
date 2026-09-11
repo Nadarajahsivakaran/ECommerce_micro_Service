@@ -1,4 +1,5 @@
 ﻿
+using ECommerce.Caching;
 using ECommerce.Models;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace Product.Test
 		private readonly Mock<ICategoryRepository> _repoMock;
 		private readonly Mock<IMapper> _mapperMock;
 		private readonly Mock<ILogger<CategoriesController>> _loggerMock;
+		private readonly Mock<ICacheService> _cacheMock;
 		private readonly CategoriesController _controller;
 
 		public CategoriesControllerTests()
@@ -25,11 +27,29 @@ namespace Product.Test
 			_repoMock = new Mock<ICategoryRepository>();
 			_mapperMock = new Mock<IMapper>();
 			_loggerMock = new Mock<ILogger<CategoriesController>>();
+			_cacheMock = new Mock<ICacheService>();
+
+			// Cache is a pass-through: always miss and invoke the factory,
+			// so tests exercise the repository/mapper behavior underneath.
+			_cacheMock.Setup(c => c.GetOrCreateAsync(
+					It.IsAny<string>(),
+					It.IsAny<Func<Task<IEnumerable<CategoryDto>>>>(),
+					It.IsAny<TimeSpan?>(),
+					It.IsAny<CancellationToken>()))
+				.Returns((string _, Func<Task<IEnumerable<CategoryDto>>> factory, TimeSpan? _, CancellationToken _) => factory());
+
+			_cacheMock.Setup(c => c.GetOrCreateAsync(
+					It.IsAny<string>(),
+					It.IsAny<Func<Task<CategoryDto?>>>(),
+					It.IsAny<TimeSpan?>(),
+					It.IsAny<CancellationToken>()))
+				.Returns((string _, Func<Task<CategoryDto?>> factory, TimeSpan? _, CancellationToken _) => factory());
 
 			_controller = new CategoriesController(
 				_repoMock.Object,
 				_mapperMock.Object,
-				_loggerMock.Object
+				_loggerMock.Object,
+				_cacheMock.Object
 			);
 		}
 
